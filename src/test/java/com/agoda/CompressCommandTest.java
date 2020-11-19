@@ -19,11 +19,11 @@ public class CompressCommandTest {
         System.setOut(new PrintStream(baos));
 
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
-            String[] args = new String[] { "/", "/", "1" };
+            String[] args = new String[] { "/home/jay/Documents", "/home/jay/Downloads/test2", "5" };
             PicocliRunner.run(CompressCommand.class, ctx, args);
 
             // compress
-            assertTrue(baos.toString().contains("Finished compressing files"));
+            assertTrue(baos.toString().contains("Compressing files in directory"));
         }
     }
 }

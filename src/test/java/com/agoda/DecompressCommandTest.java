@@ -19,11 +19,11 @@ public class DecompressCommandTest {
         System.setOut(new PrintStream(baos));
 
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
-            String[] args = new String[] { "/", "/" };
+            String[] args = new String[] { "/home/jay/Downloads/test2", "/home/jay/Downloads/test3" };
             PicocliRunner.run(DecompressCommand.class, ctx, args);
 
             // decompress
-            assertTrue(baos.toString().contains("Finished decompressing files"));
+            assertTrue(baos.toString().contains("Decompressing files in directory"));
         }
     }
 }

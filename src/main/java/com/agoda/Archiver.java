@@ -4,7 +4,6 @@ import com.agoda.commands.CompressCommand;
 import com.agoda.commands.DecompressCommand;
 import io.micronaut.configuration.picocli.PicocliRunner;
 
-import org.slf4j.LoggerFactory;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -20,6 +19,7 @@ public class Archiver implements Runnable {
     }
 
     public void run() {
+
         if (verbose) {
             System.out.println("Hi!");
         }
