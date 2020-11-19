@@ -9,10 +9,7 @@ import io.micronaut.context.env.Environment;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
@@ -140,6 +137,34 @@ public class ArchiverServiceTest {
             deleteFolder(tempDecompressedDir);
         }
 
+    }
+
+    @Test
+    public void testInvalidDirectoryCompress() throws Exception {
+        try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
+            ArchiveService archiveService = new ArchiveService();
+            archiveService.setArchiveStrategy(CompressionType.RAR);
+            Path path = Path.of("t3st");
+            archiveService.compress(path,path, 5);
+        }
+
+        catch (NotDirectoryException expected) {
+            assertTrue(expected.getMessage().contains("Invalid path supplied"));
+        }
+    }
+
+    @Test
+    public void testInvalidDirectoryDecompress() throws Exception {
+        try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
+            ArchiveService archiveService = new ArchiveService();
+            archiveService.setArchiveStrategy(CompressionType.RAR);
+            Path path = Path.of("t3st");
+            archiveService.decompress(path,path);
+        }
+
+        catch (NotDirectoryException expected) {
+            assertTrue(expected.getMessage().contains("Invalid path supplied"));
+        }
     }
 
     private static void deleteFolder(Path dir) throws IOException {
