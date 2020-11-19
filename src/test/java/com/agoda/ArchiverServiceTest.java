@@ -9,22 +9,22 @@ import io.micronaut.context.env.Environment;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static com.agoda.utils.FileUtils.deleteFolder;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ArchiverServiceTest {
     // TODO Cases
-    // Archive by split
-    // Archive by no split
     // Archive by mixed large|lesser|0 byte
     // Archive output directory has same file names (File names should have prefix (CopyOf)
-    // Archive and unarchive compare crc
-    // Archive and unarchive check subdirs
     // Decompression failure
     // Compression failure
     public static String TEMP_DIRECTORY_SRC = "archiver-test-src-";
@@ -32,7 +32,37 @@ public class ArchiverServiceTest {
     public static String TEMP_DIRECTORY_DECOMPRESSED = "archiver-test-decomp-";
     public static String DUMMY_FILE = "dummy.dat";
     @Test
-    public void testCompressAndDecompress() throws Exception {
+    public void testCompressAndDecompressCheckIdentical() throws Exception {
+
+        Path tempSrcDir = Files.createTempDirectory(TEMP_DIRECTORY_SRC);
+        Path tempCompressedDir = Files.createTempDirectory(TEMP_DIRECTORY_DST);
+        Path tempDecompressedDir = Files.createTempDirectory(TEMP_DIRECTORY_DECOMPRESSED);
+        createDummyFile(tempSrcDir, DUMMY_FILE, 100000);
+
+        try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
+            ArchiveService archiveService = new ArchiveService();
+            archiveService.setArchiveStrategy(CompressionType.ZIP);
+            archiveService.compress(tempSrcDir, tempCompressedDir, 100);
+            List<Path> paths = getFilePaths(tempCompressedDir);
+            assertTrue(String.valueOf(paths.get(0)).endsWith(Constants.ZIP_EXTENSION));
+
+            archiveService.decompress(tempCompressedDir, tempDecompressedDir);
+            List<Path> decompressedPaths = getFilePaths(tempDecompressedDir);
+            for (Path path : decompressedPaths) {
+                assertTrue(new File(String.valueOf(path)).exists());
+                Path sourceFile = tempSrcDir.resolve(path.getFileName().toString());
+                assertTrue(fileHasSameContent(sourceFile, path));
+            }
+        }
+        finally {
+            deleteFolder(tempSrcDir);
+            deleteFolder(tempCompressedDir);
+            deleteFolder(tempDecompressedDir);
+        }
+    }
+
+    @Test
+    public void testCompressAndDecompressFileSizeExceeds() throws Exception {
 
         Path tempSrcDir = Files.createTempDirectory(TEMP_DIRECTORY_SRC);
         Path tempCompressedDir = Files.createTempDirectory(TEMP_DIRECTORY_DST);
@@ -43,23 +73,51 @@ public class ArchiverServiceTest {
             ArchiveService archiveService = new ArchiveService();
             archiveService.setArchiveStrategy(CompressionType.ZIP);
             archiveService.compress(tempSrcDir, tempCompressedDir, 5);
-            List<String> paths = getFilePaths(tempCompressedDir);
-            assertTrue(paths.get(0).endsWith(Constants.ZIP_EXTENSION));
+            List<Path> paths = getFilePaths(tempCompressedDir);
+            assertTrue(String.valueOf(paths.get(0)).endsWith(Constants.ZIP_EXTENSION));
+            for (Path path : paths) {
+                assertTrue( Files.size(path) < (5 * 1024L * 1024L));
+            }
             archiveService.decompress(tempCompressedDir, tempDecompressedDir);
-            List<String> decompressedPaths = getFilePaths(tempDecompressedDir);
-            for (String path : decompressedPaths) {
-                assertTrue(new File(path).exists());
+            List<Path> decompressedPaths = getFilePaths(tempDecompressedDir);
+            for (Path path : decompressedPaths) {
+                assertTrue(new File(String.valueOf(path)).exists());
             }
 
         }
+        finally {
+            deleteFolder(tempSrcDir);
+            deleteFolder(tempCompressedDir);
+            deleteFolder(tempDecompressedDir);
+        }
+
+    }
+    private static void deleteFolder(Path dir) throws IOException {
+        Files.walkFileTree(dir, new SimpleFileVisitor<>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
-    private static List<String> getFilePaths(Path directory) throws IOException {
-        List<String> pathList = new ArrayList<>();
+    private static boolean fileHasSameContent(Path file1, Path file2) throws IOException {
+        return Files.mismatch(file1, file2) == -1;
+    }
+
+    private static List<Path> getFilePaths(Path directory) throws IOException {
+        List<Path> pathList = new ArrayList<>();
         Files.walk(directory).forEach(f -> {
             try {
                 if (Files.isRegularFile(f) && !Files.isHidden(f.toAbsolutePath())) {
-                    pathList.add(f.toAbsolutePath().toString());
+                    pathList.add(f.toAbsolutePath());
                 }
             } catch (IOException ignored) {
             }

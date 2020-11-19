@@ -1,8 +1,7 @@
 package com.agoda.utils;
 
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.Path;;
 
 public class Validator {
     public static boolean IsValidPath(Path path) {
