@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static com.agoda.utils.FileUtils.deleteFolder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ArchiverServiceTest {
@@ -74,8 +74,8 @@ public class ArchiverServiceTest {
             archiveService.setArchiveStrategy(CompressionType.ZIP);
             archiveService.compress(tempSrcDir, tempCompressedDir, 5);
             List<Path> paths = getFilePaths(tempCompressedDir);
-            assertTrue(String.valueOf(paths.get(0)).endsWith(Constants.ZIP_EXTENSION));
             for (Path path : paths) {
+                assertTrue(String.valueOf(path).endsWith(Constants.ZIP_EXTENSION));
                 assertTrue( Files.size(path) < (5 * 1024L * 1024L));
             }
             archiveService.decompress(tempCompressedDir, tempDecompressedDir);
@@ -92,6 +92,56 @@ public class ArchiverServiceTest {
         }
 
     }
+
+    @Test
+    public void testUnsupportedMode() throws Exception {
+
+        Path tempSrcDir = Files.createTempDirectory(TEMP_DIRECTORY_SRC);
+        Path tempCompressedDir = Files.createTempDirectory(TEMP_DIRECTORY_DST);
+        Path tempDecompressedDir = Files.createTempDirectory(TEMP_DIRECTORY_DECOMPRESSED);
+        createDummyFile(tempSrcDir, DUMMY_FILE, 100000);
+
+        try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
+            ArchiveService archiveService = new ArchiveService();
+            archiveService.setArchiveStrategy("test");
+            archiveService.compress(tempSrcDir, tempCompressedDir, 5);
+        }
+
+        catch (UnsupportedOperationException expected) {
+            assertEquals("Mode not found!", expected.getMessage());
+        }
+        finally {
+            deleteFolder(tempSrcDir);
+            deleteFolder(tempCompressedDir);
+            deleteFolder(tempDecompressedDir);
+        }
+    }
+
+    @Test
+    public void testNotImplementedMode() throws Exception {
+
+        Path tempSrcDir = Files.createTempDirectory(TEMP_DIRECTORY_SRC);
+        Path tempCompressedDir = Files.createTempDirectory(TEMP_DIRECTORY_DST);
+        Path tempDecompressedDir = Files.createTempDirectory(TEMP_DIRECTORY_DECOMPRESSED);
+        createDummyFile(tempSrcDir, DUMMY_FILE, 100000);
+
+        try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
+            ArchiveService archiveService = new ArchiveService();
+            archiveService.setArchiveStrategy(CompressionType.RAR);
+            archiveService.compress(tempSrcDir, tempCompressedDir, 5);
+        }
+
+        catch (UnsupportedOperationException expected) {
+            assertEquals("Compression type not supported yet.", expected.getMessage());
+        }
+        finally {
+            deleteFolder(tempSrcDir);
+            deleteFolder(tempCompressedDir);
+            deleteFolder(tempDecompressedDir);
+        }
+
+    }
+
     private static void deleteFolder(Path dir) throws IOException {
         Files.walkFileTree(dir, new SimpleFileVisitor<>() {
             @Override
