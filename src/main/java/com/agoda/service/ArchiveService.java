@@ -11,15 +11,26 @@ import java.io.IOException;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 
-import static com.agoda.utils.Validator.IsValidPath;
+import static com.agoda.utils.FileUtils.IsValidPath;
 
 
+/**
+ * Provides services for archiving operations - compress and decompress
+ */
 public class ArchiveService {
     public static final Logger logger
             = LoggerFactory.getLogger(ArchiveService.class);
 
     private ArchiveStrategyContext archiveStrategyContext;
 
+    /**
+     * Compresses file(s) and folder(s) present in the source directory to the given destination directory.
+     * Produces split archive if the source files are greater than maxFileSize
+     * @param source path
+     * @param destination path
+     * @param maxFileSize the maxfilesize (in bytes) of archive(if archive exceeds this limit , it splits it into parts)
+     * @throws IOException errors during compression
+     */
     public void compress(Path source, Path destination, long maxFileSize) throws IOException {
         logger.info("Compressing files in directory `{}` to `{}`", source, destination);
         logger.info("Split size set to {}MB", maxFileSize);
@@ -39,6 +50,12 @@ public class ArchiveService {
         logger.info("Finished compressing files");
     }
 
+    /**
+     *  Decompresses the archive(s) present in the source directory to the given destination directory.
+     * @param source path
+     * @param destination path
+     * @throws IOException errors during decompression
+     */
     public void decompress(Path source, Path destination) throws IOException {
         logger.info("Decompressing files in directory `{}` to `{}`", source, destination);
         try {
@@ -58,6 +75,11 @@ public class ArchiveService {
     }
 
 
+    /**
+     * Sets the compression type for the service
+     * @param mode zip| rar| any
+     * @throws UnsupportedOperationException if the mode doesnt exist
+     */
     public void setArchiveStrategy(String mode) throws UnsupportedOperationException {
         logger.info("Setting Archive Strategy:{}", mode);
         if (mode.equalsIgnoreCase(CompressionType.ZIP)) {

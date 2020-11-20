@@ -16,10 +16,18 @@ import java.util.List;
 import static com.agoda.constants.Constants.FILE_PART_SUFFIX;
 import static com.agoda.service.ArchiveService.logger;
 
-
+/**
+ * Provides utilities for file operations
+ */
 public class FileUtils {
 
 
+    /**
+     * Adds part suffix to the given filename
+     * @param path path of the file
+     * @param partNumber split part number
+     * @return transformed path
+     */
     public static Path resolvePartFilePath(Path path, String partNumber) {
         String fileName = path.getFileName().toString();
         if (fileName.contains(".")) {
@@ -31,19 +39,38 @@ public class FileUtils {
         return path.getParent().resolve(fileName + FILE_PART_SUFFIX + partNumber);
     }
 
+    /**
+     * Checks if its and splitted file and gives original filename+path
+     * @param path filepath
+     * @return the transformed path
+     */
     public static Path findBaseNameFromPart(Path path) {
         String fileName = path.getFileName().toString();
         if (fileName.matches(".*part.[0-9]+.*")) {
             String baseName = fileName.substring(0, fileName.indexOf(FILE_PART_SUFFIX));
             String extension = "";
-            if(fileName.contains(".")){
-                 extension = fileName.substring( fileName.lastIndexOf( "." ) );
+            if (fileName.contains(".")) {
+                extension = fileName.substring(fileName.lastIndexOf("."));
             }
             return path.getParent().resolve(baseName + extension);
         }
         return path;
     }
 
+    /**
+     * Checks given path is valid or not
+     * @param path path to check
+     * @return true or false
+     */
+    public static boolean IsValidPath(Path path) {
+        return Files.isDirectory(path);
+    }
+
+    /**
+     * Deletes a given folder
+     * @param dir path of the folder
+     * @throws IOException if operation fails
+     */
     public static void deleteFolder(Path dir) throws IOException {
         Files.walkFileTree(dir, new SimpleFileVisitor<>() {
             @Override
@@ -60,6 +87,9 @@ public class FileUtils {
         });
     }
 
+    /**
+     * Provides file and folder operations and makes sure each chunk output generated does not exceed given maxFilesize.
+     */
     public static class FileVisitor extends SimpleFileVisitor<Path> {
 
         private final List<List<Path>> chunks = new ArrayList<>();
@@ -136,6 +166,14 @@ public class FileUtils {
             }
         }
 
+        /**
+         * Splits a file into multiple chunks such that it does not exceed maxFileSize
+         * @param path path of the file
+         * @param size maxFileSize
+         * @param tempDir destination directory
+         * @return list of paths of the chunks
+         * @throws IOException if operation fails
+         */
         private List<Path> splitFile(Path path, long size, Path tempDir) throws IOException {
             List<Path> fileParts = new ArrayList<>();
             long parts = size / maxFileSize;

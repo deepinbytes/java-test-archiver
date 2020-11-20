@@ -9,6 +9,9 @@ import picocli.CommandLine.Command;
 import java.io.IOException;
 import java.nio.file.Path;
 
+/**
+ * Provides subcommands for decompress option
+ */
 @Command(name = "decompress", description = "Decompresses files given in the" +
         " source directory to the destination directory",
         mixinStandardHelpOptions = true)

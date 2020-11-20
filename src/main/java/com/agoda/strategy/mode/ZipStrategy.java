@@ -22,8 +22,23 @@ import static com.agoda.utils.Utils.getMaxMemory;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 
+/**
+ * Provides archiving operations for zip format
+ */
 public class ZipStrategy implements ArchiveStrategy {
 
+
+    /**
+     * Compresses the files & folders inside source directory
+     * The files are split into chunks based on given maxFileSize or maxAllowed JVM memory whichever is minimum
+     * The zip file produced is also split into chunks with a `part` suffix based on maxFileSize or maxAllowed JVM
+     * memory whichever is minimum
+     * The chunks are processed using parallel streams.
+     * @param source path
+     * @param destination path to put compressed zip
+     * @param maxFileSize threshold for chunks
+     * @throws IOException if operation fails
+     */
     public void compress(Path source, Path destination, long maxFileSize) throws IOException {
         maxFileSize = Math.min(maxFileSize, getMaxMemory()) * 1024L * 1024L;
         Path outputZip = destination.resolve(source.getFileName() + ZIP_EXTENSION);
@@ -50,6 +65,14 @@ public class ZipStrategy implements ArchiveStrategy {
         Files.delete(tempDir.getParent());
     }
 
+
+    /**
+     * Decompresses the archive file(s) present inside source directory.
+     * Split zips are read and processed if decompressed files has part suffix it gets merged.
+     * @param source path
+     * @param destination path
+     * @throws IOException if execution fails
+     */
     @Override
     public void decompress(Path source, Path destination) throws IOException {
 
@@ -86,6 +109,14 @@ public class ZipStrategy implements ArchiveStrategy {
         }
     }
 
+    /**
+     * Writes contents into the zip file
+     * @param contents paths of the files and folders
+     * @param zipFile path
+     * @param source path
+     * @param tempDir temporary directory used for operation(destination)
+     * @throws IOException if operation fails
+     */
     private static void writeToZip(List<Path> contents, Path zipFile, Path source, Path tempDir)
             throws IOException {
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile))) {
@@ -119,6 +150,14 @@ public class ZipStrategy implements ArchiveStrategy {
         }
     }
 
+    /**
+     * Get paths of the split file chunks
+     * @param directory source directory
+     * @param maxFileSize threshold
+     * @param destination path - will be used to split files that are above the given threshold
+     * @return list of chunk paths
+     * @throws IOException if operation fails
+     */
     private static List<List<Path>> getChunks(Path directory, long maxFileSize, Path destination) throws IOException {
         FileVisitor visitor = new FileVisitor(directory, destination, maxFileSize);
         Files.walkFileTree(directory, visitor);

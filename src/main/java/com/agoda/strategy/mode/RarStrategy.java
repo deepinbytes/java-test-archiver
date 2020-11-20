@@ -5,6 +5,9 @@ import com.agoda.strategy.ArchiveStrategy;
 import java.io.IOException;
 import java.nio.file.Path;
 
+/**
+ * Provides archiving operations for rar format
+ */
 public class RarStrategy implements ArchiveStrategy {
     @Override
     public void compress(Path source, Path destination, long maxFileSize) throws IOException {

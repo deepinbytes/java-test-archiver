@@ -9,6 +9,9 @@ import picocli.CommandLine.Parameters;
 import java.io.IOException;
 import java.nio.file.Path;
 
+/**
+ * Provides subcommands for compress option
+ */
 @Command(name = "compress", description = "Compresses files given in the " +
         "source directory to the destination directory",
         mixinStandardHelpOptions = true)

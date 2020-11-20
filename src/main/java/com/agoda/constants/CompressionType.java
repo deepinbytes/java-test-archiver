@@ -6,5 +6,4 @@ public final class CompressionType {
 
     private CompressionType() {
     }
-    // TODO: Support more types
 }

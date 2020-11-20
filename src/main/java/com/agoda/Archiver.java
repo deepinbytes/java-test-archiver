@@ -6,6 +6,9 @@ import io.micronaut.configuration.picocli.PicocliRunner;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+/**
+ * Entry point of the application
+ */
 @Command(name = "archiver", description = "Archiver that compresses files/folders",
         mixinStandardHelpOptions = true, subcommands = {CompressCommand.class, DecompressCommand.class})
 public class Archiver implements Runnable {
