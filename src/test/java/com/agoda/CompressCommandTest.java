@@ -27,8 +27,6 @@ public class CompressCommandTest {
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
             String[] args = new String[] {String.valueOf(tempSrcDir), String.valueOf(tempCompressedDir), "2" };
             PicocliRunner.run(CompressCommand.class, ctx, args);
-
-            // compress
             assertTrue(baos.toString().contains("Compressing files in directory"));
         }
         finally {
