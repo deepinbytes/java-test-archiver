@@ -7,11 +7,15 @@ Also, makes sure the compressed files are below the given size threshold or allo
 
 The app uses gradle as build tool. To build the app, simply run the command below:
 ```
-./gradlew build
+./gradlew build 
+```
+or
+```
+gradle build 
 ```
  Jar files can be found under `build/libs/`. 
 
-To invoke tests separately run `./gradlew test`.
+To invoke tests separately run `./gradlew test` or `gradle test`.
 
 Test coverage report is generated under `/build/lib/jacoco/test/html/`
 
