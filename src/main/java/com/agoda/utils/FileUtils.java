@@ -26,7 +26,7 @@ public class FileUtils {
         return path.getParent().resolve(fileName + FILE_PART_SUFFIX + partNumber);
     }
 
-    public static Path findBaseNameFromParts(Path path) {
+    public static Path findBaseNameFromPart(Path path) {
         String fileName = path.getFileName().toString();
         if (fileName.matches(".*part.[0-9]+.*")) {
             String baseName = fileName.substring(0, fileName.indexOf(FILE_PART_SUFFIX));
@@ -50,7 +50,6 @@ public class FileUtils {
                 return FileVisitResult.CONTINUE;
             }
         });
-        Files.delete(dir.getParent());
     }
 
     public static class FileVisitor extends SimpleFileVisitor<Path> {

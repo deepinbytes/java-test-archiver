@@ -18,6 +18,7 @@ import java.util.zip.ZipOutputStream;
 
 import static com.agoda.constants.Constants.*;
 import static com.agoda.service.ArchiveService.logger;
+import static com.agoda.utils.Utils.getMaxMemory;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static com.agoda.utils.FileUtils.*;
@@ -25,7 +26,7 @@ import static com.agoda.utils.FileUtils.*;
 public class ZipStrategy implements ArchiveStrategy {
 
     public void compress(Path source, Path destination, long maxFileSize) throws IOException {
-        maxFileSize = 1024L * 1024L * maxFileSize;
+        maxFileSize = Math.min( maxFileSize, getMaxMemory())* 1024L * 1024L;
         Path outputZip = destination.resolve(source.getFileName() + ZIP_EXTENSION);
 
         Path tempDir = Files.createTempDirectory(TEMP_FOLDER_PREFIX).resolve(source.getFileName().toString());
@@ -47,6 +48,7 @@ public class ZipStrategy implements ArchiveStrategy {
         if (Files.notExists(tempDir))
             return;
         deleteFolder(tempDir);
+        Files.delete(tempDir.getParent());
     }
 
     @Override
@@ -56,8 +58,10 @@ public class ZipStrategy implements ArchiveStrategy {
                 .filter(path -> path.toString().endsWith(ZIP_EXTENSION))
                 .collect(Collectors.toList());
 
-        if (compressedFiles.size() <= 0)
+        if (compressedFiles.size() <= 0) {
+            logger.error("Input directory `{}` is empty", source);
             throw new IllegalArgumentException("Input directory '" + source + " is empty");
+        }
 
         for (Path compressedFile : compressedFiles) {
             ZipInputStream zipInputStream = new ZipInputStream(Files.newInputStream(compressedFile));
@@ -68,7 +72,7 @@ public class ZipStrategy implements ArchiveStrategy {
                     Files.createDirectories(outputFile);
                 } else {
                     byte[] buffer = new byte[1024];
-                    outputFile = findBaseNameFromParts(outputFile);
+                    outputFile = findBaseNameFromPart(outputFile);
                     OutputStream outputStream = Files.newOutputStream(outputFile, CREATE, APPEND);
                     int len;
                     while ((len = zipInputStream.read(buffer)) > 0) {

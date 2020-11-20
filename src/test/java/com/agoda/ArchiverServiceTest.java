@@ -3,7 +3,6 @@ package com.agoda;
 import com.agoda.constants.CompressionType;
 import com.agoda.constants.Constants;
 import com.agoda.service.ArchiveService;
-import io.micronaut.configuration.picocli.PicocliRunner;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.env.Environment;
 import org.junit.jupiter.api.Test;
@@ -15,25 +14,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static com.agoda.utils.FileUtils.deleteFolder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ArchiverServiceTest {
-    // TODO Cases
-    // Archive by mixed large|lesser|0 byte
-    // Archive output directory has same file names (File names should have prefix (CopyOf)
-    // Decompression failure
-    // Compression failure
+
     public static String TEMP_DIRECTORY_SRC = "archiver-test-src-";
     public static String TEMP_DIRECTORY_DST = "archiver-test-dst-";
     public static String TEMP_DIRECTORY_DECOMPRESSED = "archiver-test-decomp-";
     public static String DUMMY_FILE = "dummy.dat";
+    public static String DUMMY_DIR = "dummy_directory";
     @Test
     public void testCompressAndDecompressCheckIdentical() throws Exception {
 
         Path tempSrcDir = Files.createTempDirectory(TEMP_DIRECTORY_SRC);
         Path tempCompressedDir = Files.createTempDirectory(TEMP_DIRECTORY_DST);
         Path tempDecompressedDir = Files.createTempDirectory(TEMP_DIRECTORY_DECOMPRESSED);
+        Files.createDirectory(Path.of(tempSrcDir + File.separator + DUMMY_DIR));
         createDummyFile(tempSrcDir, DUMMY_FILE, 100000);
 
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
@@ -69,7 +67,7 @@ public class ArchiverServiceTest {
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
             ArchiveService archiveService = new ArchiveService();
             archiveService.setArchiveStrategy(CompressionType.ZIP);
-            archiveService.compress(tempSrcDir, tempCompressedDir, 5);
+            archiveService.compress(tempSrcDir, tempCompressedDir, 7);
             List<Path> paths = getFilePaths(tempCompressedDir);
             for (Path path : paths) {
                 assertTrue(String.valueOf(path).endsWith(Constants.ZIP_EXTENSION));
@@ -91,12 +89,10 @@ public class ArchiverServiceTest {
     }
 
     @Test
-    public void testUnsupportedMode() throws Exception {
+    public void testUnsupportedCompressMode() throws Exception {
 
         Path tempSrcDir = Files.createTempDirectory(TEMP_DIRECTORY_SRC);
         Path tempCompressedDir = Files.createTempDirectory(TEMP_DIRECTORY_DST);
-        Path tempDecompressedDir = Files.createTempDirectory(TEMP_DIRECTORY_DECOMPRESSED);
-        createDummyFile(tempSrcDir, DUMMY_FILE, 100000);
 
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
             ArchiveService archiveService = new ArchiveService();
@@ -110,7 +106,27 @@ public class ArchiverServiceTest {
         finally {
             deleteFolder(tempSrcDir);
             deleteFolder(tempCompressedDir);
-            deleteFolder(tempDecompressedDir);
+        }
+    }
+
+    @Test
+    public void testUnsupportedDecompressMode() throws Exception {
+
+        Path tempSrcDir = Files.createTempDirectory(TEMP_DIRECTORY_SRC);
+        Path tempCompressedDir = Files.createTempDirectory(TEMP_DIRECTORY_DST);
+
+        try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
+            ArchiveService archiveService = new ArchiveService();
+            archiveService.setArchiveStrategy("test");
+            archiveService.decompress(tempSrcDir, tempCompressedDir);
+        }
+
+        catch (UnsupportedOperationException expected) {
+            assertEquals("Mode not found!", expected.getMessage());
+        }
+        finally {
+            deleteFolder(tempSrcDir);
+            deleteFolder(tempCompressedDir);
         }
     }
 
@@ -119,7 +135,6 @@ public class ArchiverServiceTest {
 
         Path tempSrcDir = Files.createTempDirectory(TEMP_DIRECTORY_SRC);
         Path tempCompressedDir = Files.createTempDirectory(TEMP_DIRECTORY_DST);
-        Path tempDecompressedDir = Files.createTempDirectory(TEMP_DIRECTORY_DECOMPRESSED);
         createDummyFile(tempSrcDir, DUMMY_FILE, 100000);
 
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
@@ -131,10 +146,20 @@ public class ArchiverServiceTest {
         catch (UnsupportedOperationException expected) {
             assertEquals("Compression type not supported yet.", expected.getMessage());
         }
+
+        try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
+            ArchiveService archiveService = new ArchiveService();
+            archiveService.setArchiveStrategy(CompressionType.RAR);
+            archiveService.decompress(tempSrcDir, tempCompressedDir);
+        }
+
+        catch (UnsupportedOperationException expected) {
+            assertEquals("Decompression type not supported yet.", expected.getMessage());
+        }
+
         finally {
             deleteFolder(tempSrcDir);
             deleteFolder(tempCompressedDir);
-            deleteFolder(tempDecompressedDir);
         }
 
     }
@@ -167,21 +192,38 @@ public class ArchiverServiceTest {
         }
     }
 
-    private static void deleteFolder(Path dir) throws IOException {
-        Files.walkFileTree(dir, new SimpleFileVisitor<>() {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                Files.delete(file);
-                return FileVisitResult.CONTINUE;
-            }
+    @Test
+    public void testDecompressionNoFiles() throws Exception {
 
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                Files.delete(dir);
-                return FileVisitResult.CONTINUE;
-            }
-        });
+        Path tempSrcDir = Files.createTempDirectory(TEMP_DIRECTORY_SRC);
+        try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
+            ArchiveService archiveService = new ArchiveService();
+            archiveService.setArchiveStrategy(CompressionType.ZIP);
+            archiveService.decompress(tempSrcDir, tempSrcDir);
+        }
+
+        catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage().contains("is empty"));
+        }
+        finally {
+            deleteFolder(tempSrcDir);
+        }
     }
+
+    @Test
+    public void testCompressionFailure() throws Exception {
+        try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
+            ArchiveService archiveService = new ArchiveService();
+            archiveService.setArchiveStrategy(CompressionType.RAR);
+            Path path = Path.of("t3st");
+            archiveService.compress(path,path,5);
+        }
+
+        catch (IOException expected) {
+            assertTrue(expected.getMessage().contains("Invalid path supplied"));
+        }
+    }
+
 
     private static boolean fileHasSameContent(Path file1, Path file2) throws IOException {
         return Files.mismatch(file1, file2) == -1;

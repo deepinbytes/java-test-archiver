@@ -10,19 +10,19 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ArchiverTest {
+public class ArchiverCommandTest {
 
     @Test
     public void testWithCommandLineOption() throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(baos));
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
 
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
             String[] args = new String[] { "-t" };
             PicocliRunner.run(Archiver.class, ctx, args);
 
             // archiver
-            assertTrue(baos.toString().contains("Hi!"));
+            assertTrue(outputStream.toString().contains("Hi!"));
         }
     }
 }

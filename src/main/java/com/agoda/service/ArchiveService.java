@@ -42,7 +42,7 @@ public class ArchiveService {
     }
 
     public void decompress(Path source, Path destination) throws IOException {
-        logger.info("Decompressing files in directory {} to {}", source, destination);
+        logger.info("Decompressing files in directory `{}` to `{}`", source, destination);
         try {
             if (IsValidPath(source) && IsValidPath(destination)) {
                 archiveStrategyContext.decompress(source, destination);
