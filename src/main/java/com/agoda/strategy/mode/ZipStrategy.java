@@ -2,7 +2,6 @@ package com.agoda.strategy.mode;
 
 import com.agoda.strategy.ArchiveStrategy;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,15 +17,15 @@ import java.util.zip.ZipOutputStream;
 
 import static com.agoda.constants.Constants.*;
 import static com.agoda.service.ArchiveService.logger;
+import static com.agoda.utils.FileUtils.*;
 import static com.agoda.utils.Utils.getMaxMemory;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
-import static com.agoda.utils.FileUtils.*;
 
 public class ZipStrategy implements ArchiveStrategy {
 
     public void compress(Path source, Path destination, long maxFileSize) throws IOException {
-        maxFileSize = Math.min( maxFileSize, getMaxMemory())* 1024L * 1024L;
+        maxFileSize = Math.min(maxFileSize, getMaxMemory()) * 1024L * 1024L;
         Path outputZip = destination.resolve(source.getFileName() + ZIP_EXTENSION);
 
         Path tempDir = Files.createTempDirectory(TEMP_FOLDER_PREFIX).resolve(source.getFileName().toString());
@@ -41,7 +40,7 @@ public class ZipStrategy implements ArchiveStrategy {
                             Path zipFile = resolvePartFilePath(outputZip, "" + index);
                             writeToZip(chunks.get(index), zipFile, source, tempDir);
                         } catch (IOException e) {
-                            logger.error( "Error zipping files:", e );
+                            logger.error("Error zipping files:", e);
                         }
                     });
         }
@@ -109,12 +108,12 @@ public class ZipStrategy implements ArchiveStrategy {
                         }
                         zipOutputStream.closeEntry();
                     }
-                    logger.debug( "Written file `{}` into archive", transformedFile );
+                    logger.debug("Written file `{}` into archive", transformedFile);
                 } else {
                     transformedFile += File.separator;
                     zipOutputStream.putNextEntry(new ZipEntry(transformedFile));
                     zipOutputStream.closeEntry();
-                    logger.debug( "Written directory `{}` into archive", transformedFile );
+                    logger.debug("Written directory `{}` into archive", transformedFile);
                 }
             }
         }

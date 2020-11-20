@@ -3,7 +3,6 @@ package com.agoda.commands;
 import com.agoda.constants.CompressionType;
 import com.agoda.service.ArchiveService;
 import io.micronaut.configuration.picocli.PicocliRunner;
-
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 

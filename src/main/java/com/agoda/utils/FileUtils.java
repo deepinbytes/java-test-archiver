@@ -1,8 +1,13 @@
 package com.agoda.utils;
 
 
-import java.io.*;
-import java.nio.file.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +26,7 @@ public class FileUtils {
             int dot = fileName.lastIndexOf(".");
             String baseName = fileName.substring(0, dot);
             String extension = fileName.substring(dot);
-            return path.getParent().resolve(baseName + FILE_PART_SUFFIX+ partNumber + extension);
+            return path.getParent().resolve(baseName + FILE_PART_SUFFIX + partNumber + extension);
         }
         return path.getParent().resolve(fileName + FILE_PART_SUFFIX + partNumber);
     }

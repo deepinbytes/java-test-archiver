@@ -29,12 +29,10 @@ public class ArchiveService {
             } else {
                 throw new NotDirectoryException("Invalid path supplied");
             }
-        }
-        catch (NotDirectoryException e){
-            logger.error("Invalid path supplied: `{}` | `{}`",source, destination);
+        } catch (NotDirectoryException e) {
+            logger.error("Invalid path supplied: `{}` | `{}`", source, destination);
             throw e;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             logger.error("Error compressing:{}", e.getMessage());
             throw e;
         }
@@ -46,14 +44,13 @@ public class ArchiveService {
         try {
             if (IsValidPath(source) && IsValidPath(destination)) {
                 archiveStrategyContext.decompress(source, destination);
-            }else {
+            } else {
                 throw new NotDirectoryException("Invalid path supplied");
             }
-        }  catch (NotDirectoryException e){
-            logger.error("Invalid path supplied: `{}` | `{}`",source, destination);
+        } catch (NotDirectoryException e) {
+            logger.error("Invalid path supplied: `{}` | `{}`", source, destination);
             throw e;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             logger.error("Error compressing:{}", e.getMessage());
             throw e;
         }

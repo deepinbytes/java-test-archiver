@@ -3,7 +3,6 @@ package com.agoda.commands;
 import com.agoda.constants.CompressionType;
 import com.agoda.service.ArchiveService;
 import io.micronaut.configuration.picocli.PicocliRunner;
-
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 
@@ -22,7 +21,7 @@ public class CompressCommand implements Runnable {
     @Parameters(index = "2", description = "Max file size of the compressed file")
     long maxFileSize;
     @Parameters(index = "3", description = "Compression mode",
-    defaultValue = CompressionType.ZIP)
+            defaultValue = CompressionType.ZIP)
     String mode;
 
     public static void main(String[] args) throws Exception {
