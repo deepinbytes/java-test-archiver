@@ -39,7 +39,7 @@ Commands:
 ```
 
 
-#####Commands:
+#### Commands:
 
 Compress command usage
 ```
