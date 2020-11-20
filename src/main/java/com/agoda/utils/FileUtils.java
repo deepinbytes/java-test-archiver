@@ -35,7 +35,10 @@ public class FileUtils {
         String fileName = path.getFileName().toString();
         if (fileName.matches(".*part.[0-9]+.*")) {
             String baseName = fileName.substring(0, fileName.indexOf(FILE_PART_SUFFIX));
-            String extension = fileName.substring(fileName.lastIndexOf("."));
+            String extension = "";
+            if(fileName.contains(".")){
+                 extension = fileName.substring( fileName.lastIndexOf( "." ) );
+            }
             return path.getParent().resolve(baseName + extension);
         }
         return path;
