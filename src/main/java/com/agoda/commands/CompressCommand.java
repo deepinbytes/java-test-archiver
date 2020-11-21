@@ -34,7 +34,7 @@ public class CompressCommand implements Runnable {
     public void run() {
 
         ArchiveService archiveService = new ArchiveService();
-        archiveService.setArchiveStrategy(mode);
+        archiveService.selectCompressionType(mode);
         try {
             archiveService.compress(source, destination, maxFileSize);
         } catch (IOException e) {

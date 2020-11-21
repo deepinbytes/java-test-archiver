@@ -24,7 +24,8 @@ public class FileUtils {
 
     /**
      * Adds part suffix to the given filename
-     * @param path path of the file
+     *
+     * @param path       path of the file
      * @param partNumber split part number
      * @return transformed path
      */
@@ -41,6 +42,7 @@ public class FileUtils {
 
     /**
      * Checks if its and splitted file and gives original filename+path
+     *
      * @param path filepath
      * @return the transformed path
      */
@@ -59,6 +61,7 @@ public class FileUtils {
 
     /**
      * Checks given path is valid or not
+     *
      * @param path path to check
      * @return true or false
      */
@@ -68,6 +71,7 @@ public class FileUtils {
 
     /**
      * Deletes a given folder
+     *
      * @param dir path of the folder
      * @throws IOException if operation fails
      */
@@ -86,6 +90,7 @@ public class FileUtils {
             }
         });
     }
+
 
     /**
      * Provides file and folder operations and makes sure each chunk output generated does not exceed given maxFilesize.
@@ -168,8 +173,9 @@ public class FileUtils {
 
         /**
          * Splits a file into multiple chunks such that it does not exceed maxFileSize
-         * @param path path of the file
-         * @param size maxFileSize
+         *
+         * @param path    path of the file
+         * @param size    maxFileSize
          * @param tempDir destination directory
          * @return list of paths of the chunks
          * @throws IOException if operation fails

@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -36,7 +35,7 @@ public class ArchiverServiceTest {
 
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
             ArchiveService archiveService = new ArchiveService();
-            archiveService.setArchiveStrategy(CompressionType.ZIP);
+            archiveService.selectCompressionType(CompressionType.ZIP);
             archiveService.compress(tempSrcDir, tempCompressedDir, 100);
             List<Path> paths = getFilePaths(tempCompressedDir);
             assertTrue(String.valueOf(paths.get(0)).endsWith(Constants.ZIP_EXTENSION));
@@ -66,7 +65,7 @@ public class ArchiverServiceTest {
 
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
             ArchiveService archiveService = new ArchiveService();
-            archiveService.setArchiveStrategy(CompressionType.ZIP);
+            archiveService.selectCompressionType(CompressionType.ZIP);
             archiveService.compress(tempSrcDir, tempCompressedDir, 7);
             List<Path> paths = getFilePaths(tempCompressedDir);
             for (Path path : paths) {
@@ -96,7 +95,7 @@ public class ArchiverServiceTest {
 
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
             ArchiveService archiveService = new ArchiveService();
-            archiveService.setArchiveStrategy("test");
+            archiveService.selectCompressionType("test");
             archiveService.compress(tempSrcDir, tempCompressedDir, 5);
         }
 
@@ -117,7 +116,7 @@ public class ArchiverServiceTest {
 
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
             ArchiveService archiveService = new ArchiveService();
-            archiveService.setArchiveStrategy("test");
+            archiveService.selectCompressionType("test");
             archiveService.decompress(tempSrcDir, tempCompressedDir);
         }
 
@@ -139,7 +138,7 @@ public class ArchiverServiceTest {
 
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
             ArchiveService archiveService = new ArchiveService();
-            archiveService.setArchiveStrategy(CompressionType.RAR);
+            archiveService.selectCompressionType(CompressionType.RAR);
             archiveService.compress(tempSrcDir, tempCompressedDir, 5);
         }
 
@@ -149,7 +148,7 @@ public class ArchiverServiceTest {
 
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
             ArchiveService archiveService = new ArchiveService();
-            archiveService.setArchiveStrategy(CompressionType.RAR);
+            archiveService.selectCompressionType(CompressionType.RAR);
             archiveService.decompress(tempSrcDir, tempCompressedDir);
         }
 
@@ -168,7 +167,7 @@ public class ArchiverServiceTest {
     public void testInvalidDirectoryCompress() throws Exception {
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
             ArchiveService archiveService = new ArchiveService();
-            archiveService.setArchiveStrategy(CompressionType.RAR);
+            archiveService.selectCompressionType(CompressionType.RAR);
             Path path = Path.of("t3st");
             archiveService.compress(path,path, 5);
         }
@@ -182,7 +181,7 @@ public class ArchiverServiceTest {
     public void testInvalidDirectoryDecompress() throws Exception {
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
             ArchiveService archiveService = new ArchiveService();
-            archiveService.setArchiveStrategy(CompressionType.RAR);
+            archiveService.selectCompressionType(CompressionType.RAR);
             Path path = Path.of("t3st");
             archiveService.decompress(path,path);
         }
@@ -198,7 +197,7 @@ public class ArchiverServiceTest {
         Path tempSrcDir = Files.createTempDirectory(TEMP_DIRECTORY_SRC);
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
             ArchiveService archiveService = new ArchiveService();
-            archiveService.setArchiveStrategy(CompressionType.ZIP);
+            archiveService.selectCompressionType(CompressionType.ZIP);
             archiveService.decompress(tempSrcDir, tempSrcDir);
         }
 
@@ -214,7 +213,7 @@ public class ArchiverServiceTest {
     public void testCompressionFailure() throws Exception {
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
             ArchiveService archiveService = new ArchiveService();
-            archiveService.setArchiveStrategy(CompressionType.RAR);
+            archiveService.selectCompressionType(CompressionType.RAR);
             Path path = Path.of("t3st");
             archiveService.compress(path,path,5);
         }

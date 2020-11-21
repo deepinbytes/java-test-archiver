@@ -80,7 +80,7 @@ public class ArchiveService {
      * @param mode zip| rar| any
      * @throws UnsupportedOperationException if the mode doesnt exist
      */
-    public void setArchiveStrategy(String mode) throws UnsupportedOperationException {
+    public void selectCompressionType(String mode) throws UnsupportedOperationException {
         logger.info("Setting Archive Strategy:{}", mode);
         if (mode.equalsIgnoreCase(CompressionType.ZIP)) {
             archiveStrategyContext = new ArchiveStrategyContext();
